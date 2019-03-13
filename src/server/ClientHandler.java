@@ -1,6 +1,6 @@
 package server;
 import java.io.*; 
-import java.util.*; 
+import java.util.*;
 import java.net.*; 
 
 //ClientHandler class 
@@ -26,7 +26,8 @@ class ClientHandler implements Runnable  {
 	public void run() { 
 	
 		String received; 
-		while (true)  { 
+		while (!s.isClosed())  { 
+			
 			try { 
 				// receive the string 
 				received = dis.readUTF(); 
@@ -41,8 +42,15 @@ class ClientHandler implements Runnable  {
 		   
 				// break the string into message and recipient part 
 				StringTokenizer st = new StringTokenizer(received, "#"); 
-				String MsgToSend = st.nextToken(); 
-				String recipient = st.nextToken(); 
+				String MsgToSend = null;
+				String recipient = null;
+				if(st.countTokens() > 0) {
+					MsgToSend = st.nextToken(); 
+					recipient = st.nextToken(); 
+				}
+				else {
+					continue;
+				}
 				
 				// search for the recipient in the connected devices list. 
 				// ar is the vector storing client of active users 
@@ -54,6 +62,14 @@ class ClientHandler implements Runnable  {
 						break; 
 					} 
 				} 
+			} catch (SocketException se) {
+				try {
+					s.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 			} catch (IOException e) {      
 				e.printStackTrace(); 
 			}    
